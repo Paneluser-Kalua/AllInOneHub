@@ -1,323 +1,177 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalua API Hub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        darkbg: '#0f172a',
-                        cardbg: '#1e293b'
-                    }
-                }
-            }
-        }
-    </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Kalua Mega API Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #030305;
+      --primary: #00f0ff;
+      --secondary: #8a2be2;
+      --surface: rgba(255, 255, 255, 0.04);
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #ffffff;
+      --text-dim: #8b8b99;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; -webkit-tap-highlight-color: transparent; }
+    body, html { width: 100%; height: 100dvh; background-color: var(--bg); color: var(--text); overflow: hidden; position: fixed; }
+    .bg-glow { position: absolute; width: 150vw; height: 150vw; background: radial-gradient(circle, rgba(138,43,226,0.15) 0%, rgba(0,240,255,0.05) 40%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: -1; }
+    .glass { background: var(--surface); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid var(--border); border-radius: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+    #lockUI { position: absolute; inset: 0; z-index: 100; display: flex; justify-content: center; align-items: center; padding: 20px; background: var(--bg); }
+    .lock-card { width: 100%; max-width: 320px; padding: 30px 20px; text-align: center; display: flex; flex-direction: column; gap: 20px; }
+    .lock-card h1 { font-size: 24px; font-weight: 700; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; color: transparent; }
+    .input-box { width: 100%; padding: 14px; background: rgba(0,0,0,0.6); border: 1px solid var(--border); border-radius: 14px; color: var(--text); font-size: 14px; text-align: center; outline: none; transition: 0.3s; }
+    .input-box:focus { border-color: var(--primary); box-shadow: 0 0 12px rgba(0,240,255,0.2); }
+    .btn { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #000; font-size: 14px; font-weight: 700; border: none; border-radius: 14px; text-transform: uppercase; cursor: pointer; }
+    .btn:active { transform: scale(0.96); }
+    #appUI { display: none; flex-direction: column; height: 100dvh; padding: 15px 20px; gap: 12px; overflow-y: auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; }
+    .header h2 { font-size: 16px; font-weight: 700; }
+    .badge { background: rgba(0, 136, 204, 0.1); color: #0088cc; padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid rgba(0, 136, 204, 0.3); text-decoration: none; display: flex; align-items: center; gap: 5px; }
+    .main-card { padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+    .segments { display: flex; background: rgba(0,0,0,0.5); border-radius: 12px; padding: 4px; border: 1px solid var(--border); }
+    .seg-btn { flex: 1; padding: 10px 0; text-align: center; font-size: 11px; font-weight: 600; color: var(--text-dim); border-radius: 9px; cursor: pointer; transition: 0.3s; }
+    .seg-btn.active { background: var(--surface); color: var(--text); border: 1px solid var(--border); }
+    select.input-box { text-align-last: center; }
+    #formView { display: flex; flex-direction: column; gap: 12px; }
+    #resultView { display: none; flex-direction: column; gap: 12px; animation: slideUp 0.3s ease; }
+    .result-box { background: rgba(0,0,0,0.4); border: 1px solid rgba(0,240,255,0.3); border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .res-data { flex: 1; overflow: hidden; }
+    .res-label { font-size: 10px; color: var(--primary); text-transform: uppercase; margin-bottom: 3px; letter-spacing: 1px; }
+    .res-value { font-family: monospace; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+    .copy-btn { background: var(--surface); border: 1px solid var(--border); padding: 8px 12px; border-radius: 8px; color: var(--text); font-size: 11px; font-weight: 600; cursor: pointer; }
+    .footer-info { text-align: center; font-size: 11px; color: var(--text-dim); padding: 10px; background: rgba(0,0,0,0.3); border-radius: 10px; border: 1px solid var(--border); }
+    .footer-info .dev-name { color: #ffffff; font-weight: 700; }
+    .footer-info .endpoint-text { font-family: monospace; color: var(--primary); margin-top: 4px; display: block; font-size: 9px; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
 </head>
-<body class="bg-darkbg text-slate-100 min-h-screen flex flex-col justify-between font-sans">
-
-    <!-- PASSWORD LOGIN MODAL -->
-    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-        <div class="bg-cardbg border border-slate-700 rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
-            <div class="text-center mb-6">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-500/10 text-blue-400 mb-4 text-2xl border border-blue-500/20">
-                    <i class="fa-solid fa-shield-halved"></i>
-                </div>
-                <h2 class="text-2xl font-bold tracking-tight text-white">Kalua API Hub Security</h2>
-                <p class="text-sm text-slate-400 mt-1">Enter access password to unlock hub</p>
-            </div>
-            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Password</label>
-                    <input type="password" id="accessPassword" required placeholder="Enter Hub Password..." 
-                        class="w-full px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl focus:outline-none focus:border-blue-500 text-white placeholder-slate-500 text-sm">
-                </div>
-                <div id="loginError" class="text-red-400 text-xs text-center hidden"></div>
-                <button type="submit" class="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition shadow-lg shadow-blue-600/30">
-                    Access Hub
-                </button>
-            </form>
-            <div class="mt-6 text-center text-xs text-slate-500">
-                Developer = KaluaApiAdmin | Channel = @KaluaApiStore
-            </div>
+<body>
+<div class="bg-glow"></div>
+<div id="lockUI">
+  <div class="glass lock-card">
+    <h1>KALUA API HUB</h1>
+    <input type="password" id="passInput" class="input-box" placeholder="Enter Password" onkeydown="if(event.key==='Enter')unlock()">
+    <button class="btn" onclick="unlock()" id="unlockBtn">Access Hub</button>
+  </div>
+</div>
+<div id="appUI">
+  <div class="header">
+    <h2>MEGA<span style="color:var(--primary)"> API HUB </span></h2>
+    <a href="https://t.me/KaluaApiStore" target="_blank" class="badge">KaluaApiStore</a>
+  </div>
+  <div class="glass main-card">
+    <div id="formView">
+      <div class="segments">
+        <div class="seg-btn active" onclick="setPlan(this, '3d')">3 Days</div>
+        <div class="seg-btn" onclick="setPlan(this, 'week')">1 Week</div>
+        <div class="seg-btn" onclick="setPlan(this, 'life')">Lifetime</div>
+      </div>
+      <select id="apiType" class="input-box">
+        <option value="vehicle-full">Vehicle Full Info</option>
+        <option value="vehicle-to-number">Vehicle to Number</option>
+        <option value="aadhaar2pan">Aadhaar to PAN</option>
+        <option value="aadhaar2num">Aadhaar to Number</option>
+        <option value="challan">Vehicle to Challan</option>
+        <option value="pan2dob">PAN to Name / DOB</option>
+      </select>
+      <input type="text" id="devName" class="input-box" placeholder="Your Username" autocomplete="off">
+      <button class="btn" onclick="generate()">Generate API Key & URL</button>
+    </div>
+    <div id="resultView">
+      <h3 style="color:var(--primary); text-align:center; font-size:16px;">Key Generated Successfully</h3>
+      <div class="result-box">
+        <div class="res-data">
+          <div class="res-label">API Key</div>
+          <div class="res-value" id="valKey">...</div>
         </div>
+        <button class="copy-btn" onclick="copyData('valKey', this)">Copy</button>
+      </div>
+      <div class="result-box">
+        <div class="res-data">
+          <div class="res-label">Ready Endpoint</div>
+          <div class="res-value" id="valUrl">...</div>
+        </div>
+        <button class="copy-btn" onclick="copyData('valUrl', this)">Copy</button>
+      </div>
+      <button class="btn" onclick="resetUI()" style="background: var(--surface); color: var(--text); border: 1px solid var(--border);">Create Another</button>
     </div>
-
-    <!-- MAIN APP CONTAINER -->
-    <div id="appContainer" class="hidden flex-1 flex flex-col">
-        <!-- HEADER -->
-        <header class="bg-cardbg/80 backdrop-blur border-b border-slate-800 sticky top-0 z-40">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-blue-600/30">
-                        <i class="fa-solid fa-bolt"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-extrabold tracking-tight text-white">KALUA API HUB</h1>
-                        <p class="text-xs text-slate-400 flex items-center space-x-2">
-                            <span>Developer: <strong class="text-blue-400">KaluaApiAdmin</strong></span>
-                            <span>•</span>
-                            <span>Telegram: <a href="https://t.me/KaluaApiStore" target="_blank" class="text-blue-400 hover:underline">@KaluaApiStore</a></span>
-                        </p>
-                    </div>
-                </div>
-                <div>
-                    <span class="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold rounded-full flex items-center space-x-1.5">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span>Online</span>
-                    </span>
-                </div>
-            </div>
-        </header>
-
-        <!-- MAIN DASHBOARD -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <!-- LEFT PANEL: TIERS & APIS -->
-            <div class="lg:col-span-1 space-y-6">
-                <!-- ACCESS TIER SELECTOR -->
-                <div class="bg-cardbg border border-slate-800 rounded-2xl p-5 shadow-xl">
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Select Subscription Tier</label>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button type="button" onclick="setTier('3day', this)" class="tier-btn py-2.5 px-2 rounded-xl text-xs font-semibold border border-blue-500 bg-blue-600/20 text-white transition">
-                            3 Days
-                        </button>
-                        <button type="button" onclick="setTier('1week', this)" class="tier-btn py-2.5 px-2 rounded-xl text-xs font-semibold border border-slate-700 bg-slate-900 text-slate-300 hover:border-blue-500 transition">
-                            1 Week
-                        </button>
-                        <button type="button" onclick="setTier('lifetime', this)" class="tier-btn py-2.5 px-2 rounded-xl text-xs font-semibold border border-slate-700 bg-slate-900 text-slate-300 hover:border-blue-500 transition">
-                            Lifetime
-                        </button>
-                    </div>
-                </div>
-
-                <!-- API ENDPOINTS LIST -->
-                <div class="bg-cardbg border border-slate-800 rounded-2xl p-5 shadow-xl">
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">Available APIs</label>
-                    <div class="space-y-2">
-                        <button onclick="selectApi('vehicle_full', 'Enter Vehicle Number (e.g. KL41V3504)', this)" class="api-card-btn w-full text-left p-3 rounded-xl border border-blue-500 bg-slate-900 transition flex items-center justify-between group active-api">
-                            <div>
-                                <div class="text-sm font-bold text-white group-hover:text-blue-400 transition">Vehicle Full Info API</div>
-                                <div class="text-xs text-slate-400">Complete vehicle data</div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-xs text-blue-400"></i>
-                        </button>
-
-                        <button onclick="selectApi('vehicle_to_number', 'Enter Vehicle Number (e.g. KL41V3504)', this)" class="api-card-btn w-full text-left p-3 rounded-xl border border-slate-700/60 bg-slate-900/50 hover:bg-slate-900 hover:border-blue-500 transition flex items-center justify-between group">
-                            <div>
-                                <div class="text-sm font-bold text-white group-hover:text-blue-400 transition">Vehicle to Number API</div>
-                                <div class="text-xs text-slate-400">Owner mobile lookup</div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-blue-400"></i>
-                        </button>
-
-                        <button onclick="selectApi('aadhaar2pan', 'Enter Aadhaar Number...', this)" class="api-card-btn w-full text-left p-3 rounded-xl border border-slate-700/60 bg-slate-900/50 hover:bg-slate-900 hover:border-blue-500 transition flex items-center justify-between group">
-                            <div>
-                                <div class="text-sm font-bold text-white group-hover:text-blue-400 transition">Aadhaar to PAN API</div>
-                                <div class="text-xs text-slate-400">Fetch associated PAN</div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-blue-400"></i>
-                        </button>
-
-                        <button onclick="selectApi('aadhaar2num', 'Enter Aadhaar Number...', this)" class="api-card-btn w-full text-left p-3 rounded-xl border border-slate-700/60 bg-slate-900/50 hover:bg-slate-900 hover:border-blue-500 transition flex items-center justify-between group">
-                            <div>
-                                <div class="text-sm font-bold text-white group-hover:text-blue-400 transition">Aadhaar to Number API</div>
-                                <div class="text-xs text-slate-400">Linked phone number</div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-blue-400"></i>
-                        </button>
-
-                        <button onclick="selectApi('challan', 'Enter Vehicle Number for Challan...', this)" class="api-card-btn w-full text-left p-3 rounded-xl border border-slate-700/60 bg-slate-900/50 hover:bg-slate-900 hover:border-blue-500 transition flex items-center justify-between group">
-                            <div>
-                                <div class="text-sm font-bold text-white group-hover:text-blue-400 transition">Vehicle to Challan API</div>
-                                <div class="text-xs text-slate-400">Check traffic challans</div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-blue-400"></i>
-                        </button>
-
-                        <button onclick="selectApi('pan2dob_name', 'Enter PAN Number (e.g. cnkpk7230d)', this)" class="api-card-btn w-full text-left p-3 rounded-xl border border-slate-700/60 bg-slate-900/50 hover:bg-slate-900 hover:border-blue-500 transition flex items-center justify-between group">
-                            <div>
-                                <div class="text-sm font-bold text-white group-hover:text-blue-400 transition">PAN to Name & DOB API</div>
-                                <div class="text-xs text-slate-400">Retrieve name & DOB</div>
-                            </div>
-                            <i class="fa-solid fa-chevron-right text-xs text-slate-500 group-hover:text-blue-400"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- RIGHT PANEL: TESTING & RESPONSE -->
-            <div class="lg:col-span-2 space-y-6 flex flex-col">
-                <div class="bg-cardbg border border-slate-800 rounded-2xl p-6 shadow-xl flex-1 flex flex-col">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 id="currentApiTitle" class="text-lg font-bold text-white">Vehicle Full Info API</h3>
-                        <span id="selectedTierBadge" class="px-2.5 py-1 bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-bold rounded-md">Tier: 3 Days</span>
-                    </div>
-
-                    <form onsubmit="executeApi(event)" class="space-y-4 mb-6">
-                        <div>
-                            <label id="inputLabel" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Enter Vehicle Number (e.g. KL41V3504)</label>
-                            <div class="flex space-x-3">
-                                <input type="text" id="queryValue" required placeholder="KL41V3504" 
-                                    class="flex-1 px-4 py-3 bg-slate-900 border border-slate-700 rounded-xl focus:outline-none focus:border-blue-500 text-white placeholder-slate-500 text-sm">
-                                <button type="submit" id="executeBtn" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition shadow-lg shadow-blue-600/30 flex items-center space-x-2">
-                                    <i class="fa-solid fa-play text-xs"></i>
-                                    <span>Run API</span>
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-
-                    <!-- RESPONSE VIEWER -->
-                    <div class="flex-1 flex flex-col min-h-[320px]">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">API Response</span>
-                            <button onclick="copyResponse()" class="text-xs text-blue-400 hover:text-blue-300 font-semibold flex items-center space-x-1">
-                                <i class="fa-regular fa-copy"></i>
-                                <span>Copy JSON</span>
-                            </button>
-                        </div>
-                        <div id="responseContainer" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-slate-300 overflow-auto max-h-[450px]">
-                            <span class="text-slate-500">// Select API and execute query to view response...</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </main>
-
-        <!-- FOOTER -->
-        <footer class="bg-cardbg border-t border-slate-800 py-6 mt-12 text-center text-xs text-slate-400 space-y-1">
-            <p>Developer = <strong class="text-blue-400">KaluaApiAdmin</strong> | Telegram Channel = <a href="https://t.me/KaluaApiStore" target="_blank" class="text-blue-400 hover:underline">@KaluaApiStore</a></p>
-        </footer>
-    </div>
-
-    <script>
-        let currentApi = 'vehicle_full';
-        let currentTier = '3day';
-
-        function handleLogin(event) {
-            event.preventDefault();
-            const password = document.getElementById('accessPassword').value;
-            
-            fetch('/api/auth', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('loginModal').classList.add('hidden');
-                    document.getElementById('appContainer').classList.remove('hidden');
-                } else {
-                    const err = document.getElementById('loginError');
-                    err.textContent = data.message;
-                    err.classList.remove('hidden');
-                }
-            })
-            .catch(() => {
-                const err = document.getElementById('loginError');
-                err.textContent = 'Connection error. Please try again.';
-                err.classList.remove('hidden');
-            });
-        }
-
-        function setTier(tier, btn) {
-            currentTier = tier;
-            document.querySelectorAll('.tier-btn').forEach(b => {
-                b.classList.remove('border-blue-500', 'bg-blue-600/20', 'text-white');
-                b.classList.add('border-slate-700', 'bg-slate-900', 'text-slate-300');
-            });
-            btn.classList.remove('border-slate-700', 'bg-slate-900', 'text-slate-300');
-            btn.classList.add('border-blue-500', 'bg-blue-600/20', 'text-white');
-            document.getElementById('selectedTierBadge').textContent = `Tier: ${btn.textContent.trim()}`;
-        }
-
-        function selectApi(apiType, placeholderText, btn) {
-            currentApi = apiType;
-            document.querySelectorAll('.api-card-btn').forEach(b => {
-                b.classList.remove('border-blue-500', 'bg-slate-900');
-                b.classList.add('border-slate-700/60', 'bg-slate-900/50');
-                b.querySelector('i').className = 'fa-solid fa-chevron-right text-xs text-slate-500';
-            });
-            btn.classList.remove('border-slate-700/60', 'bg-slate-900/50');
-            btn.classList.add('border-blue-500', 'bg-slate-900');
-            btn.querySelector('i').className = 'fa-solid fa-chevron-right text-xs text-blue-400';
-
-            const titleMap = {
-                'vehicle_full': 'Vehicle Full Info API',
-                'vehicle_to_number': 'Vehicle to Number API',
-                'aadhaar2pan': 'Aadhaar to PAN API',
-                'aadhaar2num': 'Aadhaar to Number API',
-                'challan': 'Vehicle to Challan API',
-                'pan2dob_name': 'PAN to Name & DOB API'
-            };
-
-            document.getElementById('currentApiTitle').textContent = titleMap[apiType];
-            document.getElementById('inputLabel').textContent = placeholderText;
-            const inputField = document.getElementById('queryValue');
-            inputField.placeholder = placeholderText.split(' ').pop().replace(/[()]/g, '') || 'Enter value...';
-            inputField.value = '';
-        }
-
-        function executeApi(event) {
-            event.preventDefault();
-            const queryValue = document.getElementById('queryValue').value.trim();
-            const responseContainer = document.getElementById('responseContainer');
-            const executeBtn = document.getElementById('executeBtn');
-
-            if (!queryValue) return;
-
-            executeBtn.disabled = true;
-            executeBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i><span>Executing...</span>';
-            responseContainer.innerHTML = '<span class="text-blue-400">// Fetching API response...</span>';
-
-            fetch('/api/proxy', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    apiType: currentApi,
-                    keyType: currentTier,
-                    queryValue: queryValue
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                executeBtn.disabled = false;
-                executeBtn.innerHTML = '<i class="fa-solid fa-play text-xs"></i><span>Run API</span>';
-
-                if (data.success) {
-                    responseContainer.innerHTML = `<pre class="text-emerald-400">${JSON.stringify(data.data, null, 2)}</pre>`;
-                } else {
-                    responseContainer.innerHTML = `<div class="p-6 bg-red-950/40 border border-red-500/30 rounded-xl text-red-400 font-bold text-center">
-                        <i class="fa-solid fa-triangle-exclamation mb-2 text-lg"></i><br>
-                        ${data.error}
-                    </div>`;
-                }
-            })
-            .catch(() => {
-                executeBtn.disabled = false;
-                executeBtn.innerHTML = '<i class="fa-solid fa-play text-xs"></i><span>Run API</span>';
-                responseContainer.innerHTML = `<div class="p-6 bg-red-950/40 border border-red-500/30 rounded-xl text-red-400 font-bold text-center">
-                    <i class="fa-solid fa-triangle-exclamation mb-2 text-lg"></i><br>
-                    pls purchase premium on this telegram id = @KaluaApiAdmin
-                </div>`;
-            });
-        }
-
-        function copyResponse() {
-            const responseContainer = document.getElementById('responseContainer');
-            navigator.clipboard.writeText(responseContainer.innerText).then(() => {
-                alert('JSON copied to clipboard!');
-            });
-        }
-    </script>
+  </div>
+  <div class="footer-info">
+    Developer: <span class="dev-name">KaluaApiAdmin</span> | Channel: <span class="dev-name">KaluaApiStore</span>
+  </div>
+</div>
+<script>
+const PASS = "KaluaApiHub";
+const SESSION = "kalua_hub_auth_v5";
+let activePlan = '3d';
+window.onload = () => {
+  if (sessionStorage.getItem(SESSION) === "true") {
+    document.getElementById('lockUI').style.display = 'none';
+    document.getElementById('appUI').style.display = 'flex';
+  }
+};
+function unlock() {
+  const input = document.getElementById('passInput');
+  const btn = document.getElementById('unlockBtn');
+  if(input.value === PASS) {
+    sessionStorage.setItem(SESSION, "true");
+    btn.innerHTML = "VERIFIED ✓";
+    btn.style.background = "var(--primary)";
+    btn.style.color = "#000";
+    setTimeout(() => {
+      document.getElementById('lockUI').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('lockUI').style.display = 'none';
+        document.getElementById('appUI').style.display = 'flex';
+      }, 300);
+    }, 400);
+  } else {
+    input.value = "";
+    input.placeholder = "Wrong Password!";
+    input.style.borderColor = "#ff4444";
+    setTimeout(() => input.style.borderColor = "var(--border)", 1000);
+  }
+}
+function setPlan(el, plan) {
+  document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  activePlan = plan;
+}
+function generate() {
+  const user = document.getElementById('devName').value.trim() || 'USER';
+  const apiType = document.getElementById('apiType').value;
+  const rand = Math.random().toString(36).slice(2, 7).toUpperCase();
+  const pre = activePlan === 'life' ? 'LIFE' : activePlan === 'week' ? 'W1' : 'D3';
+  const finalKey = `KALUA-${pre}-${user.slice(0,5).toUpperCase()}-${rand}`;
+  const paramKey = apiType.includes('aadhaar') ? 'aadhaar' : apiType.includes('pan') ? 'pan' : 'vehicle';
+  const sampleVal = apiType.includes('aadhaar') ? 'XXXXXXXXXXXX' : apiType.includes('pan') ? 'ABCDE1234F' : 'KL41V3504';
+  const finalUrl = `${window.location.origin}/api/${apiType}/${finalKey}?${paramKey}=${sampleVal}`;
+  document.getElementById('valKey').innerText = finalKey;
+  document.getElementById('valUrl').innerText = finalUrl;
+  document.getElementById('formView').style.display = 'none';
+  document.getElementById('resultView').style.display = 'flex';
+}
+function resetUI() {
+  document.getElementById('resultView').style.display = 'none';
+  document.getElementById('formView').style.display = 'flex';
+}
+function copyData(id, btn) {
+  const txt = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(txt).then(() => {
+    const oldTxt = btn.innerText;
+    btn.innerText = "COPIED";
+    btn.style.background = "var(--primary)";
+    btn.style.color = "#000";
+    setTimeout(() => {
+      btn.innerText = oldTxt;
+      btn.style.background = "var(--surface)";
+      btn.style.color = "var(--text)";
+    }, 1500);
+  });
+}
+</script>
 </body>
 </html>
