@@ -1,14 +1,14 @@
 {
-  "name": "kalua-api-hub",
+  "name": "kalua-mega-api-hub",
   "version": "1.0.0",
-  "description": "Professional API Hub Dashboard",
+  "description": "Kalua Mega API Hub",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "node-fetch": "^2.7.0"
+    "cors": "^2.8.5",
+    "express": "^4.19.2"
   },
   "engines": {
     "node": ">=18.0.0"
